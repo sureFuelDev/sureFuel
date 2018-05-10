@@ -102,7 +102,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "com.invertase.rnfirebasestarter"
+        applicationId "com.surefuel.surefuelapp"
         minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
@@ -147,6 +147,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-fbsdk')
     implementation(project(':react-native-firebase')) {
         transitive = false
     }
