@@ -1,8 +1,39 @@
 import React from 'react';
 import { StyleSheet, Platform, Image, Text, View, ScrollView } from 'react-native';
 
-import { AccessToken, LoginManager } from 'react-native-fbsdk';
+
+import { AccessToken, LoginManager,LoginButton } from 'react-native-fbsdk';
 import firebase from 'react-native-firebase';
+
+
+const facebookLogin = async () => {
+    try {
+        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
+
+        if (result.isCancelled) {
+            throw new Error('User cancelled request'); // Handle this however fits the flow of your app
+        }
+
+        console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
+
+        // get the access token
+        const data = await AccessToken.getCurrentAccessToken();
+
+        if (!data) {
+            throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
+        }
+
+        // create a new firebase credential with the token
+        const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+
+        // login with credential
+        const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
+
+        console.info(JSON.stringify(currentUser.user.toJSON()))
+    } catch (e) {
+        console.error(e);
+    }
+}
 
 export default class App extends React.Component {
   constructor() {
@@ -15,6 +46,8 @@ export default class App extends React.Component {
   componentDidMount() {
     // firebase things?
   }
+
+
 
   render() {
     return (
@@ -39,6 +72,25 @@ export default class App extends React.Component {
           </Text>
         )}
         <View style={styles.modules}>
+          <LoginButton
+              onLoginFinished={
+                  (error, result) => {
+                      if (error) {
+                          alert("login has error: " + result.error);
+                      } else if (result.isCancelled) {
+                          alert("login is cancelled.");
+                      } else {
+                        facebookLogin();
+                          // AccessToken.getCurrentAccessToken().then(
+                          //     (data) => {
+                          //         alert(data.accessToken.toString())
+                          //     }
+                          // )
+                      }
+                  }
+              }
+              onLogoutFinished={() => alert("logout.")}/>
+
           <Text style={styles.modulesHeader}>The following Firebase modules are enabled:</Text>
           {firebase.admob.nativeModuleExists && <Text style={styles.module}>Admob</Text>}
           {firebase.analytics.nativeModuleExists && <Text style={styles.module}>Analytics</Text>}
