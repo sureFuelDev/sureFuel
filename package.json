@@ -26,6 +26,8 @@
     "react-native": "^0.55.3",
     "react-native-fbsdk": "^0.7.0",
     "react-native-firebase": "^4.0.7",
+    "react-native-maps": "^0.21.0",
+    "react-navigation": "^2.0.1",
     "react-redux": "^5.0.7",
     "redux-thunk": "^2.2.0"
   }

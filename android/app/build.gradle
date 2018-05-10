@@ -171,6 +171,8 @@ dependencies {
         transitive = true
     }
 
+    // REACT-NATIVE-MAPS
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:27.0.2"
     implementation "com.facebook.react:react-native:+"  // From node_modules

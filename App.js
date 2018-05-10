@@ -1,150 +1,219 @@
 import React from 'react';
-import { StyleSheet, Platform, Image, Text, View, ScrollView } from 'react-native';
+import {StyleSheet, Platform, Image, Text, View, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
 
-
-import { AccessToken, LoginManager,LoginButton } from 'react-native-fbsdk';
+import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
 import firebase from 'react-native-firebase';
+import {SwitchNavigator, createStackNavigator, StackNavigator } from 'react-navigation';
+
+import BasicOrder from './Components/BasicOrder';
 
 
-const facebookLogin = async () => {
-    try {
-        const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
+const height = Dimensions.get('window').height;
+const width = Dimensions.get('window').width;
 
-        if (result.isCancelled) {
-            throw new Error('User cancelled request'); // Handle this however fits the flow of your app
+
+class App extends React.Component {
+
+    static navigationOptions = {
+        header: null
+    };
+
+    constructor() {
+        super();
+        this.state = {
+            // firebase things?
+        };
+    }
+
+    componentDidMount() {
+        // firebase things?
+    }
+
+    facebookLogin = async () => {
+        try {
+            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
+
+            if (result.isCancelled) {
+                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
+            }
+
+            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
+
+            // get the access token
+            const data = await AccessToken.getCurrentAccessToken();
+
+            if (!data) {
+                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
+            }
+
+            // create a new firebase credential with the token
+            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+
+            // login with credential
+            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
+
+            console.info(JSON.stringify(currentUser.user.toJSON()))
+            this.props.navigation.navigate('BasicOrder')
+
+        } catch (e) {
+            console.error(e);
         }
+    }
 
-        console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
 
-        // get the access token
-        const data = await AccessToken.getCurrentAccessToken();
+    render() {
+        return (
+            <View style={styles.container}>
+                <Image source={require('./assets/LoginBackground.png')}
+                       style={{
+                           position: 'absolute',
+                           resizeMode: 'cover',
+                           width: width,
+                           height: height,
 
-        if (!data) {
-            throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-        }
+                       }}/>
 
-        // create a new firebase credential with the token
-        const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
 
-        // login with credential
-        const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
+                <View style={styles.logoContainer}>
 
-        console.info(JSON.stringify(currentUser.user.toJSON()))
-    } catch (e) {
-        console.error(e);
+                    <Image source={require('./assets/sure-fuel-icon.png')} style={[styles.logo]}/>
+                    <Text style={styles.welcome}>
+                        SUREFUEL </Text>
+                    <Text style={styles.subheader}>
+                        TAP THE ASS TO FILL </Text>
+                </View>
+
+                <View style={styles.loginContainer}>
+                    <TouchableOpacity style={{
+                        borderRadius: 40,
+                        alignItems: 'center',
+                        alignSelf: 'flex-end',
+                        justifyContent: 'center',
+                        width: width * 0.7,
+                        backgroundColor: '#4267B2',
+                        marginBottom: 15,
+                    }} onPress={() => this.facebookLogin()}>
+
+                        <Text
+                            style={{
+                                color: 'white',
+                                fontWeight: '600',
+                                marginVertical: 15,
+                                fontSize: 15
+                            }}>
+                            Continue with Facebook</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+                        borderRadius: 40,
+                        alignItems: 'center',
+                        alignSelf: 'flex-end',
+                        justifyContent: 'center',
+                        width: width * 0.7,
+                        backgroundColor: '#58B982',
+                        marginBottom: 40,
+                    }} onPress={() => this.facebookLogin()}>
+
+                        <Text
+                            style={{
+                                color: 'white',
+                                fontWeight: '600',
+                                marginVertical: 15,
+                                fontSize: 15
+                            }}>
+                            Phone Authorization</Text>
+                    </TouchableOpacity>
+
+                </View>
+            </View>
+        );
     }
 }
 
-export default class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      // firebase things?
-    };
-  }
-
-  componentDidMount() {
-    // firebase things?
-  }
-
-
-
-  render() {
-    return (
-      <ScrollView>
-        <View style={styles.container}>
-        <Image source={require('./assets/RNFirebase.png')} style={[styles.logo]} />
-        <Text style={styles.welcome}>
-          Welcome to the React Native{'\n'}Firebase starter project!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        {Platform.OS === 'ios' ? (
-          <Text style={styles.instructions}>
-            Press Cmd+R to reload,{'\n'}
-            Cmd+D or shake for dev menu
-          </Text>
-        ) : (
-          <Text style={styles.instructions}>
-            Double tap R on your keyboard to reload,{'\n'}
-            Cmd+M or shake for dev menu
-          </Text>
-        )}
-        <View style={styles.modules}>
-          <LoginButton
-              onLoginFinished={
-                  (error, result) => {
-                      if (error) {
-                          alert("login has error: " + result.error);
-                      } else if (result.isCancelled) {
-                          alert("login is cancelled.");
-                      } else {
-                        facebookLogin();
-                          // AccessToken.getCurrentAccessToken().then(
-                          //     (data) => {
-                          //         alert(data.accessToken.toString())
-                          //     }
-                          // )
-                      }
-                  }
-              }
-              onLogoutFinished={() => alert("logout.")}/>
-
-          <Text style={styles.modulesHeader}>The following Firebase modules are enabled:</Text>
-          {firebase.admob.nativeModuleExists && <Text style={styles.module}>Admob</Text>}
-          {firebase.analytics.nativeModuleExists && <Text style={styles.module}>Analytics</Text>}
-          {firebase.auth.nativeModuleExists && <Text style={styles.module}>Authentication</Text>}
-          {firebase.crashlytics.nativeModuleExists && <Text style={styles.module}>Crashlytics</Text>}
-          {firebase.firestore.nativeModuleExists && <Text style={styles.module}>Cloud Firestore</Text>}
-          {firebase.messaging.nativeModuleExists && <Text style={styles.module}>Cloud Messaging</Text>}
-          {firebase.links.nativeModuleExists && <Text style={styles.module}>Dynamic Links</Text>}
-          {firebase.iid.nativeModuleExists && <Text style={styles.module}>Instance ID</Text>}
-          {firebase.notifications.nativeModuleExists && <Text style={styles.module}>Notifications</Text>}
-          {firebase.perf.nativeModuleExists && <Text style={styles.module}>Performance Monitoring</Text>}
-          {firebase.database.nativeModuleExists && <Text style={styles.module}>Realtime Database</Text>}
-          {firebase.config.nativeModuleExists && <Text style={styles.module}>Remote Config</Text>}
-          {firebase.storage.nativeModuleExists && <Text style={styles.module}>Storage</Text>}
-        </View>
-        </View>    
-      </ScrollView>
-    );
-  }
-}
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  logo: {
-    height: 80,
-    marginBottom: 16,
-    marginTop: 32,
-    width: 80,
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-  modules: {
-    margin: 20,
-  },
-  modulesHeader: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  module: {
-    fontSize: 14,
-    marginTop: 4,
-    textAlign: 'center',
-  }
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F5FCFF',
+    },
+    logo: {
+        marginBottom: 16,
+        marginTop: 32,
+        height: 125,
+        width: 125,
+    },
+    logoContainer: {
+        flex: 1,
+        marginTop: 20,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    welcome: {
+        fontSize: 30,
+        textAlign: 'center',
+        margin: 10,
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    subheader: {
+        fontSize: 20,
+        textAlign: 'center',
+        color: 'white',
+    },
+    loginContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+    },
+    modulesHeader: {
+        fontSize: 16,
+        marginBottom: 8,
+    },
+    module: {
+        fontSize: 14,
+        marginTop: 4,
+        textAlign: 'center',
+    }
 });
+
+
+const AppStack = StackNavigator({ BasicOrder: BasicOrder});
+const AuthStack = StackNavigator({ SignIn: App });
+
+export default SwitchNavigator(
+    {
+        // AuthLoading: AuthLoadingScreen,
+        App: AppStack,
+        Auth: AuthStack,
+    },
+    {
+        initialRouteName: 'Auth',
+    }
+);
+//
+//
+// <Text style={styles.modulesHeader}>The following Firebase modules are enabled:</Text>
+// {firebase.admob.nativeModuleExists && <Text style={styles.module}>Admob</Text>}
+// {firebase.analytics.nativeModuleExists && <Text style={styles.module}>Analytics</Text>}
+// {firebase.auth.nativeModuleExists && <Text style={styles.module}>Authentication</Text>}
+// {firebase.crashlytics.nativeModuleExists && <Text style={styles.module}>Crashlytics</Text>}
+// {firebase.firestore.nativeModuleExists && <Text style={styles.module}>Cloud Firestore</Text>}
+// {firebase.messaging.nativeModuleExists && <Text style={styles.module}>Cloud Messaging</Text>}
+// {firebase.links.nativeModuleExists && <Text style={styles.module}>Dynamic Links</Text>}
+// {firebase.iid.nativeModuleExists && <Text style={styles.module}>Instance ID</Text>}
+// {firebase.notifications.nativeModuleExists && <Text style={styles.module}>Notifications</Text>}
+// {firebase.perf.nativeModuleExists && <Text style={styles.module}>Performance Monitoring</Text>}
+// {firebase.database.nativeModuleExists && <Text style={styles.module}>Realtime Database</Text>}
+// {firebase.config.nativeModuleExists && <Text style={styles.module}>Remote Config</Text>}
+// {firebase.storage.nativeModuleExists && <Text style={styles.module}>Storage</Text>}
+
+
+//// export default createSwitchNavigator({
+//         SignIn: {
+//             screen: App
+//         },
+//         BasicOrder: {
+//             screen: BasicOrder
+//         }
+//     },
+// );
+//
