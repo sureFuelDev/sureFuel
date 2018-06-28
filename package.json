@@ -22,13 +22,20 @@
   },
   "dependencies": {
     "fbjs": "^0.8.16",
+    "immutability-helper": "^2.7.1",
+    "point-in-polygon": "^1.0.1",
     "react": "^16.3.1",
     "react-native": "^0.55.3",
+    "react-native-app-intro": "https://github.com/merryjs/react-native-app-intro",
     "react-native-fbsdk": "^0.7.0",
     "react-native-firebase": "^4.0.7",
+    "react-native-interactable": "^0.1.10",
+    "react-native-linear-gradient": "^2.4.0",
     "react-native-maps": "^0.21.0",
-    "react-navigation": "^2.0.1",
+    "react-native-vector-icons": "^4.6.0",
+    "react-navigation": "^2.3.1",
     "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
     "redux-thunk": "^2.2.0"
   }
 }

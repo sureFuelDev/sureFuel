@@ -1,129 +1,154 @@
 import React from 'react';
-import {StyleSheet, Platform, Image, Text, View, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
-import MapView from 'react-native-maps';
+import {
+    StyleSheet,
+    Platform,
+    Image,
+    Text,
+    View,
+    Animated,
+    Dimensions,
+    TouchableOpacity,
+    AsyncStorage
+} from 'react-native';
+import {connect} from 'react-redux';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
 import firebase from 'react-native-firebase';
+import LoginButtons from './Login/LoginButtons'
+import EmailPassword from "./Login/EmailPassword";
 
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
+const mapStateToProps = state => ({
+    loginState: state.common.loginState
+});
 
-export default class BasicOrder extends React.Component {
+const mapDispatchToProps = dispatch => ({
+    setLoginState: (value) => {
+        dispatch({type: 'SET_LOGIN_STATE', value: value});
+    },
+});
+
+
+class Loading extends React.Component {
     static navigationOptions = {
         header: null
     };
 
     constructor() {
         super();
-        this.state = {
-            // firebase things?
-        };
     }
+
+
 
     componentDidMount() {
-        // firebase things?
+        firebase.auth().onAuthStateChanged(user => {
+            // this.props.navigation.navigate('Home');
+            console.log('This is the user ' + user);
+
+            AsyncStorage.getAllKeys((keys) => {
+                console.log('tryna get some keys');
+                console.log(keys);
+
+                if (user !== null) {
+                    if (user.metadata.lastSignInTime === user.metadata.creationTime && keys === null) {
+                        AsyncStorage.setItem('firstLoad', 'load')
+                        this.props.navigation.navigate('WalkThrough');
+
+                    } else {
+                        this.props.navigation.navigate('Home')
+                    }
+
+                    AsyncStorage.setItem('userToken', user.uid);
+
+                } else {
+                    //Animate the Login in
+                    this.props.setLoginState(1);
+
+                }
+            });
+        })
     }
 
-    facebookLogin = async () => {
-        try {
-            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
-
-            if (result.isCancelled) {
-                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
-            }
-
-            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
-
-            // get the access token
-            const data = await AccessToken.getCurrentAccessToken();
-
-            if (!data) {
-                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-            }
-
-            // create a new firebase credential with the token
-            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-
-            // login with credential
-            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-
-            console.info(JSON.stringify(currentUser.user.toJSON()))
-            this.props.navigation.navigate('BasicOrder')
-
-        } catch (e) {
-            console.error(e);
+    renderView = () => {
+        switch (this.props.loginState) {
+            case 0:
+                return <View style={styles.loginContainer}/>
+            case 1:
+                return <LoginButtons/>
+            case 2:
+                return <EmailPassword/>
         }
-    }
+    };
+
+    renderBack = () => {
+        if (this.props.loginState !== 0 && this.props.loginState !== 1) {
+            return <TouchableOpacity style={{position: 'absolute', left: 15, top: 15,}}
+                                     onPress={() => this.props.setLoginState(1)}>
+                <Icon
+                    name={"ios-arrow-back"}
+                    size={40}
+                    color={'white'}
+                />
+            </TouchableOpacity>
+        } else {
+            return <View></View>
+        }
+
+    };
+
+
     render() {
         return (
             <View style={styles.container}>
-                <Image source={require('./assets/LoginBackground.png')}
-                       style={{
-                           position: 'absolute',
-                           resizeMode: 'cover',
-                           width: width,
-                           height: height,
+                <Animated.View style={{
+                    flex: 1,
+                    top: 0,
+                    left: 0,
+                    height: height,
+                    zIndex: 100,
+                    width: width,
+                    position: 'absolute',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#F5FCFF',
+                    elevation: 10,
+                    opacity: this.mapOverlayOpacity
+                }}>
+                    <Image source={require('../assets/LoginBackground.png')}
+                           style={{
+                               position: 'absolute',
+                               resizeMode: 'cover',
+                               width: width,
+                               height: height,
 
-                       }}/>
+                           }}/>
+
+                    {this.renderBack()}
 
 
-                <View style={styles.logoContainer}>
+                    <View style={styles.logoContainer}>
 
-                    <Image source={require('./assets/sure-fuel-icon.png')} style={[styles.logo]}/>
-                    <Text style={styles.welcome}>
-                        SUREFUEL </Text>
-                    <Text style={styles.subheader}>
-                        TAP THE ASS TO FILL </Text>
-                </View>
+                        <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
+                        <Text style={styles.welcome}>
+                            SUREFUEL </Text>
+                        <Text style={styles.subheader}>
+                            TAP THE APP TO FILL </Text>
+                    </View>
 
-                <View style={styles.loginContainer}>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#4267B2',
-                        marginBottom: 15,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Continue with Facebook</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#58B982',
-                        marginBottom: 40,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Phone Authorization</Text>
-                    </TouchableOpacity>
-
-                </View>
+                    {this.renderView()}
+                </Animated.View>
             </View>
 
         );
     }
 }
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Loading);
+
 
 const styles = StyleSheet.create({
     container: {
@@ -131,6 +156,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
+        height: height, width: width
     },
     logo: {
         marginBottom: 16,
@@ -159,6 +185,7 @@ const styles = StyleSheet.create({
     loginContainer: {
         flex: 1,
         justifyContent: 'flex-end',
+        backgroundColor: 'black'
     },
     modulesHeader: {
         fontSize: 16,

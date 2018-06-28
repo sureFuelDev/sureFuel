@@ -1,172 +1,151 @@
-import React from 'react';
-import {StyleSheet, Platform, Image, Text, View, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
-import MapView from 'react-native-maps';
-
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
-
+import React, {Component} from 'react';
+import {AppRegistry, Alert, View, StyleSheet, Text, Image, Dimensions} from 'react-native';
+import AppIntro from 'react-native-app-intro';
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
+export default class WalkThrough extends React.Component {
 
-export default class BasicOrder extends React.Component {
     static navigationOptions = {
-        header: null
+        header: null,
+        drawerLabel: 'WalkThrough'
+    };
+    onSkipBtnHandle = (index) => {
+        Alert.alert('Skip');
+        console.log(index);
+    };
+    doneBtnHandle = () => {
+        this.props.navigation.navigate('Home')
+    };
+    nextBtnHandle = (index) => {
+        console.log(index);
+    };
+    onSlideChangeHandle = (index, total) => {
+        console.log(index, total);
     };
 
-    constructor() {
-        super();
-        this.state = {
-            // firebase things?
-        };
-    }
-
-    componentDidMount() {
-        // firebase things?
-    }
-
-    facebookLogin = async () => {
-        try {
-            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
-
-            if (result.isCancelled) {
-                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
-            }
-
-            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
-
-            // get the access token
-            const data = await AccessToken.getCurrentAccessToken();
-
-            if (!data) {
-                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-            }
-
-            // create a new firebase credential with the token
-            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-
-            // login with credential
-            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-
-            console.info(JSON.stringify(currentUser.user.toJSON()))
-            this.props.navigation.navigate('BasicOrder')
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
     render() {
+        const pageArray = [{
+            title: 'Save Your Time',
+            description: 'Schedule in your what?',
+            img: require('../assets/sure-fuel-icon.png'),
+            imgStyle: {
+                height: 70 * 2.5,
+                width: 80 * 2.5,
+            },
+            backgroundColor: '#fa931d',
+            fontColor: '#fff',
+            level: 10,
+        }, {
+            title: 'Page 2',
+            description: 'Description 2',
+            img: require('../assets/sure-fuel-icon.png'),
+            imgStyle: {
+                height: 93 * 2.5,
+                width: 103 * 2.5,
+            },
+            backgroundColor: '#a4b602',
+            fontColor: '#fff',
+            level: 10,
+        }];
         return (
-            <View style={styles.container}>
-                <Image source={require('../assets/LoginBackground.png')}
-                       style={{
-                           position: 'absolute',
-                           resizeMode: 'cover',
-                           width: width,
-                           height: height,
+            <AppIntro
+                customStyles={{btnContainer: {flex: 1}}}
+                onNextBtnClick={this.nextBtnHandle}
+                onDoneBtnClick={this.doneBtnHandle}
+                onSkipBtnClick={this.onSkipBtnHandle}
+                onSlideChange={this.onSlideChangeHandle}
+                showSkipButton={false}
+                showDoneButton={true}
+            >
+                <View style={[styles.slide, {backgroundColor: '#fab821'}]}>
+                    <View level={30} style={{width: width, alignItems: 'center'}}>
+                        <View level={5} style={{position: 'absolute', top: 0, width: 100, height: 200, zIndex: 20}}>
+                            <Image source={require('../assets/pin.png')} style={{height: 200, width: 100}}/>
+                        </View>
+                        <Image
+                            resizeMode={'contain'}
+                            source={require('../assets/city-order.png')} style={[styles.image]}/>
+                    </View>
 
-                       }}/>
 
-
-                <View style={styles.logoContainer}>
-
-                    <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
-                    <Text style={styles.welcome}>
-                        SUREFUEL </Text>
-                    <Text style={styles.subheader}>
-                        TAP THE ASS TO FILL </Text>
+                    <View level={15}><Text style={styles.textTitle}>Pre-Schedule your Fills!</Text></View>
+                    <View level={20}><Text style={styles.text}>Forget about ever filling up your vehicle
+                        again!</Text></View>
                 </View>
+                <View style={[styles.slide, {backgroundColor: '#a4b602'}]}>
+                    <View level={10} style={{width: width, alignItems: 'center'}}>
 
-                <View style={styles.loginContainer}>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#4267B2',
-                        marginBottom: 15,
-                    }} onPress={() => this.facebookLogin()}>
+                        <View level={30}
+                              style={{position: 'absolute', top: -40, width: width * 0.9, height: width * 0.3}}>
+                            <Image
+                                resizeMode={'contain'}
+                                source={require('../assets/clouds.png')}
+                                style={{height: width * 0.7, width: width * 0.9}}/>
+                        </View>
+                        <Image
+                            resizeMode={'contain'}
+                            source={require('../assets/cloudsbg.png')}
+                            style={[styles.image]}/>
 
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Continue with Facebook</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#58B982',
-                        marginBottom: 40,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Phone Authorization</Text>
-                    </TouchableOpacity>
-
+                    </View>
+                    <View level={3}><Text style={styles.textTitle}>Order wherever you are!</Text></View>
+                    <View level={50}><Text style={styles.text}>On demand, and on time!</Text></View>
                 </View>
-            </View>
-
+                <View style={[styles.slide, {backgroundColor: '#63b5b6'}]}>
+                    <View level={30} style={{width: width, alignItems: 'center'}}>
+                        <View level={5} style={{position: 'absolute', top: -30, height: width, width: width * 0.7, zIndex: 20}}>
+                            <Image resizeMode={'contain'} source={require('../assets/money.png')}
+                                   style={{height: width, width: width * 0.7}}/>
+                        </View>
+                        <Image
+                            resizeMode={'contain'}
+                            source={require('../assets/money-back.png')} style={[styles.image]}/>
+                    </View>
+                    <View level={8}><Text style={styles.textTitle}>And Make it Rain!</Text></View>
+                    <View level={15}><Text style={styles.text}>Sign up to be a SureFuel driver! Earn extra cash.</Text></View>
+                </View>
+            </AppIntro>
         );
     }
 }
 
 const styles = StyleSheet.create({
-    container: {
+    slide: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F5FCFF',
+        backgroundColor: '#9DD6EB',
+        paddingBottom: 40,
+        paddingRight: 20,
+        paddingLeft: 20
     },
-    logo: {
-        marginBottom: 16,
-        marginTop: 32,
-        height: 125,
-        width: 125,
-    },
-    logoContainer: {
-        flex: 1,
-        marginTop: 20,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    welcome: {
+    textTitle: {
+        color: '#fff',
         fontSize: 30,
-        textAlign: 'center',
-        margin: 10,
-        color: 'white',
         fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 10,
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 10
     },
-    subheader: {
+    text: {
+        color: '#fff',
         fontSize: 20,
         textAlign: 'center',
-        color: 'white',
+        marginHorizontal: 20,
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 10
     },
-    loginContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    modulesHeader: {
-        fontSize: 16,
-        marginBottom: 8,
-    },
-    module: {
-        fontSize: 14,
-        marginTop: 4,
-        textAlign: 'center',
+    image: {
+        width: width * 0.5,
+        height: width * 0.6,
+        marginBottom: 20,
     }
 });
+
+
+// AppRegistry.registerComponent('WalkThrough', () => WalkThrough);

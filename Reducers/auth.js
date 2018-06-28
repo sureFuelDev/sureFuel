@@ -1,20 +1,22 @@
 const defaultState = {
-    octane: null,
-    loginState: 0
+    user: null,
+    email: null,
+    password: null,
 };
 
 export default (state = defaultState, action) => {
     switch (action.type) {
-        case 'OCTANE_SELECTED':
+        case 'SET_EMAIL':
             return {
                 ...state,
-                octane: action.octane
-            }
-        case 'SET_LOGIN_STATE':
+                email: action.value
+            };
+        case 'SET_PASSWORD':
             return {
                 ...state,
-                loginState: action.value
-            }
+                password: action.value
+            };
+
     }
 
     return state;

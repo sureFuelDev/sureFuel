@@ -3,13 +3,43 @@ import {StyleSheet, Platform, Image, Text, View, ScrollView, TouchableOpacity, D
 
 import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
 import firebase from 'react-native-firebase';
-import {SwitchNavigator, createStackNavigator, StackNavigator } from 'react-navigation';
+import {
+    SwitchNavigator,
+    createStackNavigator,
+    StackNavigator,
+    createDrawerNavigator,
+    DrawerItems,
+    SafeAreaView
+} from 'react-navigation';
+
+import {Provider} from 'react-redux';
+import {connect} from 'react-redux';
+import store from './store';
 
 import BasicOrder from './Components/BasicOrder';
+import Loading from './Components/Loading';
+import PersonalInfo from './Components/PersonalInfo'
+import WalkThrough from './Components/WalkThrough'
+import ContactUs from './Components/ContactUs';
+import Login from './Components/Login/Login'
+import SecondOrder from './Components/SecondOrder'
+
+
+import CustomDrawerContentComponent from './Components/CustomDrawerContentComponent'
 
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
+
+const mapStateToProps = state => ({
+    subscriberSessionId: state.navigationReducer.subscriberSessionId
+});
+
+const mapDispatchToProps = dispatch => ({
+    timeToggle: (value) => {
+        dispatch({type: 'TIME_TOGGLE', isTimeInput: value});
+    },
+});
 
 
 class App extends React.Component {
@@ -20,176 +50,53 @@ class App extends React.Component {
 
     constructor() {
         super();
-        this.state = {
-            // firebase things?
-        };
     }
-
-    componentDidMount() {
-        // firebase things?
-    }
-
-    facebookLogin = async () => {
-        try {
-            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
-
-            if (result.isCancelled) {
-                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
-            }
-
-            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
-
-            // get the access token
-            const data = await AccessToken.getCurrentAccessToken();
-
-            if (!data) {
-                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-            }
-
-            // create a new firebase credential with the token
-            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-
-            // login with credential
-            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-
-            console.info(JSON.stringify(currentUser.user.toJSON()))
-            this.props.navigation.navigate('BasicOrder')
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
 
     render() {
         return (
-            <View style={styles.container}>
-                <Image source={require('./assets/LoginBackground.png')}
-                       style={{
-                           position: 'absolute',
-                           resizeMode: 'cover',
-                           width: width,
-                           height: height,
+            <Provider store={store}>
+                <Navigator/>
+            </Provider>
 
-                       }}/>
-
-
-                <View style={styles.logoContainer}>
-
-                    <Image source={require('./assets/sure-fuel-icon.png')} style={[styles.logo]}/>
-                    <Text style={styles.welcome}>
-                        SUREFUEL </Text>
-                    <Text style={styles.subheader}>
-                        TAP THE ASS TO FILL </Text>
-                </View>
-
-                <View style={styles.loginContainer}>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#4267B2',
-                        marginBottom: 15,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Continue with Facebook</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#58B982',
-                        marginBottom: 40,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Phone Authorization</Text>
-                    </TouchableOpacity>
-
-                </View>
-            </View>
         );
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    logo: {
-        marginBottom: 16,
-        marginTop: 32,
-        height: 125,
-        width: 125,
-    },
-    logoContainer: {
-        flex: 1,
-        marginTop: 20,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    welcome: {
-        fontSize: 30,
-        textAlign: 'center',
-        margin: 10,
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    subheader: {
-        fontSize: 20,
-        textAlign: 'center',
-        color: 'white',
-    },
-    loginContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    modulesHeader: {
-        fontSize: 16,
-        marginBottom: 8,
-    },
-    module: {
-        fontSize: 14,
-        marginTop: 4,
-        textAlign: 'center',
-    }
+const AppStack = StackNavigator({
+    BasicOrder: BasicOrder,
+    WalkThrough: WalkThrough
+});
+const AuthStack = StackNavigator({
+    Loading: Loading,
+    Login: Login
 });
 
+const OrderStack = StackNavigator({
+    Home: BasicOrder,
+    secondOrder: SecondOrder
+});
 
-const AppStack = StackNavigator({ BasicOrder: BasicOrder});
-const AuthStack = StackNavigator({ SignIn: App });
+const drawerNav = createDrawerNavigator({
+    Home: OrderStack,
+    Settings: PersonalInfo,
+    WalkThrough: WalkThrough,
+    ContactUs: ContactUs
+}, {
+    title: 'SureFuel',
+    contentComponent: CustomDrawerContentComponent
+});
 
-export default SwitchNavigator(
+const Navigator = new SwitchNavigator(
     {
-        // AuthLoading: AuthLoadingScreen,
-        App: AppStack,
-        Auth: AuthStack,
+        App: drawerNav,
+        Loading: AuthStack,
     },
     {
-        initialRouteName: 'Auth',
+        initialRouteName: 'Loading',
     }
 );
-//
+
+export default App ;
 //
 // <Text style={styles.modulesHeader}>The following Firebase modules are enabled:</Text>
 // {firebase.admob.nativeModuleExists && <Text style={styles.module}>Admob</Text>}

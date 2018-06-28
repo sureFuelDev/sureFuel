@@ -28,3 +28,16 @@ allprojects {
         }
     }
 }
+
+
+/**
+ + Project-wide Gradle configuration properties -> See React-Native-Maps
+ */
+ext {
+    compileSdkVersion   = 26
+    targetSdkVersion    = 26
+    buildToolsVersion   = "26.0.2"
+    supportLibVersion   = "26.1.0"
+    googlePlayServicesVersion = "15.0.0"
+    androidMapsUtilsVersion = "0.5+"
+}

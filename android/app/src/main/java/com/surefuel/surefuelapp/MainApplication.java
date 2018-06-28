@@ -3,6 +3,7 @@ package com.surefuel.surefuelapp;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.wix.interactable.Interactable;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -24,6 +25,10 @@ import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage; // Fi
 import io.invertase.firebase.perf.RNFirebasePerformancePackage; // Firebase Performance
 import io.invertase.firebase.storage.RNFirebaseStoragePackage; // Firebase Storage
 import io.invertase.firebase.fabric.crashlytics.RNFirebaseCrashlyticsPackage; // Crashlytics
+
+import com.airbnb.android.react.maps.MapsPackage;
+import com.BV.LinearGradient.LinearGradientPackage; // <--- This!
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +59,7 @@ public class MainApplication extends Application implements ReactApplication {
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+            new Interactable(),
                     new FBSDKPackage(mCallbackManager),
                     new RNFirebasePackage(),
                     // add/remove these packages as appropriate
@@ -69,7 +75,10 @@ public class MainApplication extends Application implements ReactApplication {
                     new RNFirebaseNotificationsPackage(),
                     new RNFirebasePerformancePackage(),
                     new RNFirebaseRemoteConfigPackage(),
-                    new RNFirebaseStoragePackage()
+                    new RNFirebaseStoragePackage(),
+                    new MapsPackage(),
+                    new LinearGradientPackage()
+
             );
         }
 

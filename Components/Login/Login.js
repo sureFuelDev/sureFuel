@@ -23,43 +23,26 @@ export default class BasicOrder extends React.Component {
     }
 
     componentDidMount() {
-        // firebase things?
+        this.props.navigation.navigate('Home');
+
+        // firebase.auth().onAuthStateChanged((user) => {
+        //         if (user) {
+        //             // User is signed in.
+        //             console.log('User is Signed-In');
+        //             this.props.navigation.navigate('Home');
+        //
+        //         } else {
+        //             // No user is signed in.
+        //             console.log('User is not Signed-In')
+        //         }
+        //     }
+        // )
     }
 
-    facebookLogin = async () => {
-        try {
-            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
-
-            if (result.isCancelled) {
-                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
-            }
-
-            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
-
-            // get the access token
-            const data = await AccessToken.getCurrentAccessToken();
-
-            if (!data) {
-                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-            }
-
-            // create a new firebase credential with the token
-            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-
-            // login with credential
-            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-
-            console.info(JSON.stringify(currentUser.user.toJSON()))
-            this.props.navigation.navigate('BasicOrder')
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
     render() {
         return (
             <View style={styles.container}>
-                <Image source={require('../assets/LoginBackground.png')}
+                <Image source={require('../../assets/LoginBackground.png')}
                        style={{
                            position: 'absolute',
                            resizeMode: 'cover',
@@ -71,7 +54,7 @@ export default class BasicOrder extends React.Component {
 
                 <View style={styles.logoContainer}>
 
-                    <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
+                    <Image source={require('../../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
                     <Text style={styles.welcome}>
                         SUREFUEL </Text>
                     <Text style={styles.subheader}>

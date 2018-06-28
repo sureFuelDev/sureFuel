@@ -34,9 +34,9 @@ export default class PersonalInfo extends React.Component {
 
     static navigationOptions = {
         header: null,
-        drawerLabel: 'Settings',
+        drawerLabel: 'Contact Us',
         drawerIcon: ({tintColor}) => (
-            <Icon name="ios-cog" size={25} color={tintColor}/>
+            <Icon name="ios-mail" size={25} color={tintColor}/>
 
         ),
 
@@ -45,20 +45,19 @@ export default class PersonalInfo extends React.Component {
 
     render() {
         return (
-            <KeyboardAvoidingView keyboardVerticalOffset={100} style={styles.avoidingView} contentContainerStyle={{paddingBottom: 5}} enabled>
+            <KeyboardAvoidingView keyboardVerticalOffset={100} style={styles.avoidingView}
+                                  contentContainerStyle={{paddingBottom: 5}} enabled>
 
-            <LinearGradient colors={['#484e4e', '#37abb8']}
+                <LinearGradient colors={['#484e4e', '#37abb8']}
                                 style={styles.container}>
 
                     <View style={styles.logoContainer}>
 
                         <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
                         <Text style={styles.welcome}>
-                            THANK YOU FOR CHOOSING SUREFUEL!
-                        </Text>
+                            SEND FEEDBACK </Text>
                         <Text style={styles.subheader}>
-                            Please provide your updated contact information to help us serve you better.
-                        </Text>
+                            Your matter to us! We're trying to make the best product possible. Let us know how to better serve you. </Text>
                     </View>
 
 
@@ -135,12 +134,18 @@ const styles = StyleSheet.create({
         margin: 10,
         color: 'white',
         fontWeight: 'bold',
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 10
     },
     subheader: {
         fontSize: 16,
         textAlign: 'center',
         color: 'white',
-        marginHorizontal: 20
+        marginHorizontal: 20,
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 10
     },
     listContainer: {
         flex: 1,

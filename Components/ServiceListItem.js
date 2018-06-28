@@ -1,172 +1,141 @@
 import React from 'react';
-import {StyleSheet, Platform, Image, Text, View, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
-import MapView from 'react-native-maps';
+import {
+    Animated,
+    Text,
+    View,
+    StyleSheet,
+    TextInput,
+    Image,
+    Dimensions,
+    TouchableOpacity,
+    TouchableHighlight,
+    Button,
+    Easing,
+    FlatList,
+    ScrollView,
+    TouchableWithoutFeedback,
+    ToastAndroid,
+    Switch,
+    Slider,
+    Picker,
+    Platform,
+    StatusBar
+} from 'react-native';
 
-import {AccessToken, LoginManager, LoginButton} from 'react-native-fbsdk';
-import firebase from 'react-native-firebase';
+
+import {connect} from 'react-redux';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 
+const mapStateToProps = state => ({
+});
 
-export default class BasicOrder extends React.Component {
-    static navigationOptions = {
-        header: null
-    };
+const mapDispatchToProps = dispatch => ({
 
-    constructor() {
-        super();
+});
+
+
+class ServiceListItem extends React.Component {
+    constructor(props) {
+        super(props);
         this.state = {
-            // firebase things?
-        };
+            selected: false
+        }}
+
+    toggle() {
+        this.props.callback(!this.props.selected);
     }
 
-    componentDidMount() {
-        // firebase things?
-    }
+    _keyExtractor = (item, index) => item.id;
 
-    facebookLogin = async () => {
-        try {
-            const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
-
-            if (result.isCancelled) {
-                throw new Error('User cancelled request'); // Handle this however fits the flow of your app
-            }
-
-            console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
-
-            // get the access token
-            const data = await AccessToken.getCurrentAccessToken();
-
-            if (!data) {
-                throw new Error('Something went wrong obtaining the users access token'); // Handle this however fits the flow of your app
-            }
-
-            // create a new firebase credential with the token
-            const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
-
-            // login with credential
-            const currentUser = await firebase.auth().signInAndRetrieveDataWithCredential(credential);
-
-            console.info(JSON.stringify(currentUser.user.toJSON()))
-            this.props.navigation.navigate('BasicOrder')
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
     render() {
+
+
         return (
-            <View style={styles.container}>
-                <Image source={require('../assets/LoginBackground.png')}
-                       style={{
-                           position: 'absolute',
-                           resizeMode: 'cover',
-                           width: width,
-                           height: height,
+            <View style={{
+                flexDirection: 'row',
+                width: '100%',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginVertical: 20,
+                backgroundColor: this.props.index % 2 === 0 ? 'rgba(250,250,250,0.4)' : 'rgba(250,250,250,0.1)'
+            }}>
+                <TouchableOpacity style={{flexDirection: 'row', flex: 1, alignItems: 'center'}} onPress={() => this.toggle()}>
 
-                       }}/>
-
-
-                <View style={styles.logoContainer}>
-
-                    <Image source={require('../assets/sure-fuel-icon.png')} style={[styles.logo]}/>
-                    <Text style={styles.welcome}>
-                        SUREFUEL </Text>
-                    <Text style={styles.subheader}>
-                        TAP THE ASS TO FILL </Text>
-                </View>
-
-                <View style={styles.loginContainer}>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
+                    <View style={{
+                        flex: 4,
+                        flexDirection: 'column',
                         justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#4267B2',
-                        marginBottom: 15,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Continue with Facebook</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        borderRadius: 40,
-                        alignItems: 'center',
-                        alignSelf: 'flex-end',
-                        justifyContent: 'center',
-                        width: width * 0.7,
-                        backgroundColor: '#58B982',
-                        marginBottom: 40,
-                    }} onPress={() => this.facebookLogin()}>
-
-                        <Text
-                            style={{
-                                color: 'white',
-                                fontWeight: '600',
-                                marginVertical: 15,
-                                fontSize: 15
-                            }}>
-                            Phone Authorization</Text>
-                    </TouchableOpacity>
-
-                </View>
+                        paddingVertical: 10,
+                        marginLeft: 20
+                    }}>
+                        <Text style={styles.titleText}>{this.props.name}</Text>
+                    </View>
+                    <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                        {this.props.selected ?
+                            <Icon name="ios-checkmark-circle-outline" size={40} style={{marginRight: 30}} color="#00BBF5"/>
+                            : <View>
+                                <Text
+                                    style={{
+                                        color: '#00BBF5',
+                                        marginRight: 30,
+                                        fontSize: 14
+                                    }}>
+                                    Add</Text>
+                            </View>
+                        }
+                    </View>
+                </TouchableOpacity>
             </View>
-
-        );
+        )
+            ;
     }
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    logo: {
-        marginBottom: 16,
-        marginTop: 32,
-        height: 125,
-        width: 125,
-    },
-    logoContainer: {
-        flex: 1,
-        marginTop: 20,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    welcome: {
-        fontSize: 30,
-        textAlign: 'center',
-        margin: 10,
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    subheader: {
-        fontSize: 20,
-        textAlign: 'center',
-        color: 'white',
-    },
-    loginContainer: {
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    modulesHeader: {
-        fontSize: 16,
-        marginBottom: 8,
-    },
-    module: {
-        fontSize: 14,
-        marginTop: 4,
-        textAlign: 'center',
-    }
-});
+const
+    styles = StyleSheet.create({
+
+        cardContainer: {
+            elevation: 10,
+            paddingVertical: 20,
+            borderRadius: 10,
+            marginTop: 30,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            marginBottom: 40,
+        },
+        titleText: {
+            color: '#4D81C2',
+            fontWeight: 'bold',
+            fontSize: 18,
+        },
+        subText: {
+            color: '#5690d8',
+            fontSize: 12,
+
+        },
+        button: {
+            backgroundColor: '#86E5C6',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 8,
+            marginTop: 5,
+            marginBottom: 5,
+            paddingVertical: 7,
+            marginRight: 5,
+        },
+        buttonText: {
+            color: 'white',
+            fontSize: 12,
+            marginHorizontal: 15,
+        }
+
+    });
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ServiceListItem);
+//
